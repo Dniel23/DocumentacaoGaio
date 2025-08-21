@@ -92,3 +92,36 @@ body {
     right: -30px;
     background-color: #F8F4F0;
 }
+
+/* Estilos para as imagens SVG */
+.slide-image {
+    position: absolute;
+    width: 150px;
+    height: 150px;
+    opacity: 0;
+    transition: opacity 0.8s ease-out, transform 0.8s ease-out;
+    pointer-events: none;
+    z-index: 5; /* Abaixo do painel */
+}
+
+.left-image {
+    left: 5%;
+    top: 50%;
+    transform: translateY(-50%) translateX(-20px);
+}
+
+.right-image {
+    right: 5%;
+    top: 50%;
+    transform: translateY(-50%) translateX(20px);
+}
+
+.left-image.slide-image-active {
+    opacity: 1;
+    transform: translateY(-50%) translateX(0);
+}
+
+.right-image.slide-image-active {
+    opacity: 1;
+    transform: translateY(-50%) translateX(0);
+}

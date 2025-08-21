@@ -173,11 +173,19 @@ function renderPriorities() {
     });
 }
 
+const progressBar = document.getElementById('progress-bar');
 let currentSlide = 0;
 const slidesContainer = document.getElementById('slides-container');
-const totalSlides = document.querySelectorAll('.slide').length;
+const slides = document.querySelectorAll('.slide');
+const totalSlides = slides.length;
 const prevBtn = document.getElementById('prev-btn');
 const nextBtn = document.getElementById('next-btn');
+const slideImages = document.querySelectorAll('.slide-image');
+
+function updateProgressBar() {
+    const progress = (currentSlide / (totalSlides - 1)) * 100;
+    progressBar.style.width = `${progress}%`;
+}
 
 function updateSlide() {
     slidesContainer.style.transform = `translateX(-${currentSlide * 100}vw)`;
@@ -187,6 +195,31 @@ function updateSlide() {
     prevBtn.classList.toggle('cursor-not-allowed', prevBtn.disabled);
     nextBtn.classList.toggle('opacity-50', nextBtn.disabled);
     nextBtn.classList.toggle('cursor-not-allowed', nextBtn.disabled);
+    updateProgressBar();
+    
+    // Controla as animações de fade-in dos elementos e das imagens
+    slides.forEach((slide, index) => {
+        const elements = slide.querySelectorAll('.fade-in-element');
+        const image = slide.querySelector('.slide-image');
+
+        if (index === currentSlide) {
+            // Anima os elementos de texto e a imagem do slide atual
+            elements.forEach((el, i) => {
+                setTimeout(() => {
+                    el.classList.add('fade-in-active');
+                }, i * 150); // Atraso de 150ms para cada elemento
+            });
+            if (image) {
+                image.classList.add('slide-image-active');
+            }
+        } else {
+            // Remove a classe de animação dos outros slides
+            elements.forEach(el => el.classList.remove('fade-in-active'));
+            if (image) {
+                image.classList.remove('slide-image-active');
+            }
+        }
+    });
 }
 
 nextBtn.addEventListener('click', () => {
