@@ -1,0 +1,557 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Painel do Projeto Gaio</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            background: #eef2f3; /* Fallback para navegadores antigos */
+            background: linear-gradient(to bottom right, #eef2f3, #8e9eab); /* Gradiente moderno */
+            color: #4A4A4A;
+            /* overflow-x: hidden é intencional para evitar rolagem horizontal devido aos slides */
+            overflow-x: hidden;
+        }
+        
+        .chart-container {
+            position: relative;
+            width: 100%;
+            margin-left: auto;
+            margin-right: auto;
+            /* Altura removida para permitir expansão vertical */
+        }
+        
+        .slides-container {
+            display: flex;
+            transition: transform 0.6s ease-in-out;
+            will-change: transform;
+            width: fit-content;
+        }
+        
+        .slide {
+            flex-shrink: 0;
+            width: 100vw;
+            /* min-height em vez de height para permitir expansão vertical */
+            min-height: 100vh;
+            padding: 2rem;
+            box-sizing: border-box;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        /* Estilos específicos do painel de slide e formas 2D */
+        .slide-panel {
+            background-color: #FFFFFF;
+            padding: 4rem;
+            border-radius: 1rem;
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+            max-width: 90%;
+            width: 100%;
+            position: relative;
+            z-index: 10;
+            /* Adicionado overflow-y-auto para lidar com conteúdo longo e fornecer barra de rolagem */
+            overflow-y: auto;
+            max-height: 90vh; /* Impede que o painel ocupe mais de 90% da altura da viewport */
+        }
+        
+        @media (min-width: 768px) {
+            .slide-panel {
+                max-width: 800px;
+            }
+        }
+        
+        @media (max-width: 768px) {
+            .slide {
+                padding: 1rem;
+            }
+            .slide-panel {
+                padding: 2rem;
+            }
+        }
+        
+        /* Formas decorativas 2D usando pseudo-elementos */
+        .slide-panel:before, .slide-panel:after {
+            content: '';
+            position: absolute;
+            background-color: #E6F0F5;
+            border-radius: 50%;
+            z-index: 0;
+            opacity: 0.8;
+            filter: blur(50px);
+        }
+        
+        .slide-panel:before {
+            width: 200px;
+            height: 200px;
+            top: -50px;
+            left: -50px;
+        }
+        
+        .slide-panel:after {
+            width: 150px;
+            height: 150px;
+            bottom: -30px;
+            right: -30px;
+            background-color: #F8F4F0;
+        }
+        
+        /* Estilos para as imagens SVG */
+        .slide-image {
+            position: absolute;
+            width: 150px;
+            height: 150px;
+            opacity: 0;
+            transition: opacity 0.8s ease-out, transform 0.8s ease-out;
+            pointer-events: none;
+            z-index: 5; /* Abaixo do painel */
+        }
+        
+        .left-image {
+            left: 5%;
+            top: 50%;
+            transform: translateY(-50%) translateX(-20px);
+        }
+        
+        .right-image {
+            right: 5%;
+            top: 50%;
+            transform: translateY(-50%) translateX(20px);
+        }
+        
+        .left-image.slide-image-active {
+            opacity: 1;
+            transform: translateY(-50%) translateX(0);
+        }
+        
+        .right-image.slide-image-active {
+            opacity: 1;
+            transform: translateY(-50%) translateX(0);
+        }
+
+        /* Estilos de hover para os cards de requisito */
+        #requirements-list > div {
+            transition: transform 0.3s ease-in-out;
+            cursor: pointer;
+        }
+
+        #requirements-list > div:hover {
+            transform: scale(1.05);
+        }
+    </style>
+</head>
+<body class="antialiased">
+
+    <div class="fixed top-0 left-0 w-full h-1 bg-gray-200 z-50">
+        <div id="progress-bar" class="h-1 bg-[#3498DB] transition-all duration-500 ease-in-out"></div>
+    </div>
+
+    <div class="slides-container" id="slides-container">
+        
+        <div class="slide">
+            <svg class="slide-image left-image" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" style="color: white;">
+                <path d="M12 2L9.19 8.63L2 9.24L7.45 14.1L5.82 21.01L12 17.77L18.18 21.01L16.55 14.1L22 9.24L14.81 8.63L12 2Z" fill="#F1C40F"/>
+            </svg>
+            
+            <div class="slide-panel text-center">
+                <header class="mb-8 fade-in-element">
+                    <div class="flex flex-col items-center justify-center">
+                        <h1 class="text-4xl md:text-5xl font-bold text-[#2C3E50] mb-2">Projeto Gaio</h1>
+                    </div>
+                    <p class="text-lg text-gray-600">Uma visão interativa da documentação da ferramenta de gestão de tarefas.</p>
+                </header>
+            </div>
+        </div>
+
+        <div class="slide">
+            <svg class="slide-image right-image" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <path d="M4 22H6V12H4V22ZM12 22H10V2H12V22ZM18 22H16V7H18V22Z" fill="#3498DB"/>
+            </svg>
+
+            <div class="slide-panel">
+                <section id="dashboard" class="fade-in-element">
+                    <h2 class="text-2xl font-bold text-center mb-6 text-[#34495E]">Visão Geral do Projeto</h2>
+                    <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                        <div class="bg-gray-50 p-6 rounded-lg shadow-md flex flex-col justify-center items-center">
+                            <span class="text-5xl font-bold text-[#3498DB]" id="total-rf"></span>
+                            <p class="text-gray-500 mt-2">Requisitos Funcionais</p>
+                        </div>
+                        <div class="bg-gray-50 p-6 rounded-lg shadow-md flex flex-col justify-center items-center">
+                            <span class="text-5xl font-bold text-[#E74C3C]" id="total-rnf"></span>
+                            <p class="text-gray-500 mt-2">Requisitos Não Funcionais</p>
+                        </div>
+                        <div class="bg-gray-50 p-6 rounded-lg shadow-md">
+                            <h3 class="text-lg font-semibold text-center mb-4">Status Geral de Implementação</h3>
+                            <div class="chart-container h-48">
+                                <canvas id="statusGeralChart"></canvas>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+            </div>
+        </div>
+
+        <div class="slide">
+            <svg class="slide-image left-image" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <path d="M15.5 14H14.71L14.43 13.73C15.41 12.59 16 11.11 16 9.5C16 5.91 13.09 3 9.5 3C5.91 3 3 5.91 3 9.5C3 13.09 5.91 16 9.5 16C11.11 16 12.59 15.41 13.73 14.43L14 14.71V15.5L19.25 20.75L20.75 19.25L15.5 14ZM9.5 14C7.01 14 5 11.99 5 9.5C5 7.01 7.01 5 9.5 5C11.99 5 14 7.01 14 9.5C14 11.99 11.99 14 9.5 14Z" fill="#F39C12"/>
+            </svg>
+
+            <div class="slide-panel">
+                <section id="explorer" class="fade-in-element">
+                    <h2 class="text-2xl font-bold text-center mb-6 text-[#34495E]">Explorador de Requisitos</h2>
+                    <div class="flex justify-center border-b mb-6">
+                        <button id="btn-rf" class="px-6 py-2 text-lg font-semibold border-b-4 border-[#3498DB] text-[#3498DB]">Funcionais</button>
+                        <button id="btn-rnf" class="px-6 py-2 text-lg font-semibold border-b-4 border-transparent text-gray-500">Não Funcionais</button>
+                    </div>
+                    
+                    <div class="w-full mb-8">
+                        <h3 class="text-lg font-semibold text-center mb-4">Distribuição de Status</h3>
+                        <div class="chart-container h-64">
+                            <canvas id="statusDetalheChart"></canvas>
+                        </div>
+                    </div>
+
+                    <div id="requirements-list" class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    </div>
+                </section>
+            </div>
+        </div>
+        
+        <div class="slide">
+            <svg class="slide-image right-image" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <path d="M12 2L15.09 8.26L22 9.27L17 14.14L18.18 21.02L12 17.77L5.82 21.02L7 14.14L2 9.27L8.91 8.26L12 2Z" fill="#F1C40F"/>
+            </svg>
+            
+            <div class="slide-panel">
+                <section id="priority" class="fade-in-element">
+                    <h2 class="text-2xl font-bold text-center mb-6 text-[#34495E]">Requisitos Prioritários</h2>
+                    <div class="bg-white p-6 rounded-lg shadow-md">
+                        <ul id="priority-list" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+                        </ul>
+                    </div>
+                </section>
+            </div>
+        </div>
+
+        <div class="slide">
+            <svg class="slide-image left-image" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <path d="M12 2C6.48 2 2 6.48 2 12C2 17.52 6.48 22 12 22C17.52 22 22 17.52 22 12C22 6.48 17.52 2 12 2ZM12 20C7.59 20 4 16.41 4 12C4 7.59 7.59 4 12 4C16.41 4 20 7.59 20 12C20 16.41 16.41 20 12 20ZM12.75 7.5V11H16.25V12.5H12.75V16H11.25V12.5H7.75V11H11.25V7.5H12.75Z" fill="#9B59B6"/>
+            </svg>
+            
+            <div class="slide-panel">
+                <section id="nrp" class="fade-in-element">
+                    <h2 class="text-2xl font-bold text-center mb-6 text-[#34495E]">O Problema do Próximo Lançamento (NRP)</h2>
+                    <div class="prose max-w-none text-gray-600">
+                        <p class="mb-4">O <strong>Next Release Problem (NRP)</strong> é um desafio de otimização no desenvolvimento de software. Ele consiste em selecionar o conjunto ideal de requisitos para serem incluídos na próxima versão de um produto, levando em conta múltiplas restrições.</p>
+                        <h3 class="text-xl font-semibold text-[#34495E] mb-2">Objetivos Principais</h3>
+                        <ul class="list-disc list-inside space-y-1 mb-4">
+                            <li><strong>Maximizar a Satisfação do Cliente:</strong> Entregar as funcionalidades mais valiosas para os usuários.</li>
+                            <li><strong>Minimizar Custo e Esforço:</strong> Respeitar orçamentos e prazos de desenvolvimento.</li>
+                            <li><strong>Gerenciar Dependências:</strong> Considerar que alguns requisitos só podem ser implementados após outros.</li>
+                        </ul>
+                        <h3 class="text-xl font-semibold text-[#3498DB] mb-2">Por que é um problema complexo?</h3>
+                        <ul class="list-disc list-inside space-y-1 mb-4">
+                            <li>É considerado um problema <strong>NP-hard</strong>, o que significa que não há uma solução trivial.</li>
+                            <li>Envolve a conciliação de objetivos conflitantes (satisfação vs. custo).</li>
+                            <li>Requer a tomada de decisões em um cenário de incertezas e interdependências.</li>
+                        </ul>
+                        <p class="mt-4 text-center text-sm text-gray-500">Em resumo, o NRP é o desafio de decidir o que entregar a seguir, balanceando o valor para o cliente com a viabilidade técnica e financeira.</p>
+                    </div>
+                </section>
+            </div>
+        </div>
+
+    </div>
+
+    <div class="fixed bottom-8 left-1/2 transform -translate-x-1/2 flex space-x-4">
+        <button id="prev-btn" class="bg-white text-gray-700 font-bold py-2 px-4 rounded-full shadow-lg opacity-50 cursor-not-allowed transition duration-300 ease-in-out">Anterior</button>
+        <button id="next-btn" class="bg-white text-gray-700 font-bold py-2 px-4 rounded-full shadow-lg transition duration-300 ease-in-out">Próximo</button>
+    </div>
+
+    <script>
+        const data = {
+            functional: [
+                { id: "RF1", req: "Autenticação de Usuário", desc: "O sistema deve permitir que os usuários se cadastrem com e-mail e senha e, posteriormente, se autentiquem para acessar o sistema.", status: "Implementado" },
+                { id: "RF2", req: "Gestão de Tarefas (CRUD)", desc: "Os usuários devem poder criar, visualizar, editar e excluir tarefas.", status: "Implementado" },
+                { id: "RF3", req: "Atributos da Tarefa", desc: "Cada tarefa deve possuir os seguintes atributos: título, descrição, status, progresso (0-100%), prioridade, data de criação, usuário responsável, cargo associado e cor de etiqueta.", status: "Implementado" },
+                { id: "RF4", req: "Gestão de Cargos (CRUD)", desc: "O sistema deve permitir a criação, listagem, edição e exclusão de cargos, que podem ser associados a tarefas.", status: "Implementado" },
+                { id: "RF5", req: "Visualização em Colunas (Kanban)", desc: "As tarefas devem ser exibidas em colunas que representam seus diferentes status, permitindo uma visualização no estilo Kanban.", status: "Implementado" },
+                { id: "RF6", req: "Arrastar e Soltar (Drag-and-Drop)", desc: "Os usuários devem poder mover tarefas entre as colunas de status (arrastar e soltar), alterando seu status e ordem.", status: "Implementado" },
+                { id: "RF7", req: "Filtros de Tarefas", desc: "A visualização de tarefas deve permitir a filtragem por status, prioridade e usuário responsável.", status: "Implementado" },
+                { id: "RF8", req: "Gestão de Status", desc: "O sistema deve permitir adicionar, remover, editar e reordenar os status das tarefas, que são usados para criar as colunas do quadro Kanban.", status: "Implementado" },
+                { id: "RF9", req: "Edição Rápida de Título", desc: "O título da tarefa deve ser editável diretamente no card da tarefa na visualização principal.", status: "Parcialmente Implementado" },
+                { id: "RF10", req: "Personalização de Cor da Etiqueta", desc: "Os usuários devem poder selecionar uma cor personalizada para a etiqueta de cada tarefa.", status: "Implementado" },
+                { id: "RF11", req: "Associação de Tarefa a Usuário e Cargo", desc: "Ao criar ou editar uma tarefa, deve ser possível associá-la a um usuário responsável e a um cargo.", status: "Implementado" },
+                { id: "RF12", req: "Página Inicial", desc: "O sistema deve apresentar uma página inicial com informações gerais e links de navegação.", status: "Implementado" },
+                { id: "RF13", req: "Modo Escuro", desc: "A interface deve oferecer um modo escuro para melhor visualização em ambientes com pouca luz.", status: "Parcialmente Implementado" },
+                { id: "RF14", req: "Interface Responsiva", desc: "O sistema deve se adaptar a diferentes tamanhos de tela para garantir uma boa experiência em desktops e dispositivos móveis.", status: "Parcialmente Implementado" },
+                { id: "RF15", req: "Gamificação", desc: "O sistema deve exibir o progresso do usuário com emblemas durante todo o tempo de uso, garantindo uma carreira rastreada para maior contribuição da equipe.", status: "Implementado" },
+                { id: "RF16", req: "Tela de boas-vindas", desc: "Ao entrar na seção de tarefas, o sistema deve exibir uma tela de boas-vindas ao usuário, carregando em seguida a tela de tarefas.", status: "Implementado" }
+            ],
+            nonFunctional: [
+                { id: "RNF1", req: "Usabilidade", desc: "A interface deve ser intuitiva e fácil de usar, com elementos visuais claros e feedback para as ações do usuário.", status: "Implementado" },
+                { id: "RNF2", req: "Desempenho", desc: "As interações, como carregar tarefas, filtrar e arrastar, devem ser rápidas e fluidas, sem atrasos perceptíveis.", status: "Implementado" },
+                { id: "RNF3", req: "Manutenibilidade", desc: "O código-fonte está organizado em uma estrutura padrão de projeto Spring Boot (MVC), com separação de responsabilidades, facilitando a manutenção e evolução do sistema.", status: "Implementado" },
+                { id: "RNF4", req: "Segurança", desc: "A autenticação é baseada em credenciais armazenadas, embora a implementação de hashes de senha e HTTPS seja recomendada para um ambiente de produção.", status: "Parcialmente Implementado" },
+                { id: "RNF5", req: "Persistência de Dados", desc: "Os dados de usuários, cargos, tarefas e status são persistidos em arquivos JSON, garantindo que as informações não sejam perdidas ao reiniciar o servidor.", status: "Implementado" },
+                { id: "RNF6", req: "Flexibilidade", desc: "A gestão de status permite que os usuários adaptem os fluxos de trabalho às suas necessidades específicas.", status: "Implementado" },
+                { id: "RNF7", req: "Compatibilidade", desc: "O projeto utiliza tecnologias web padrão (HTML, CSS, JavaScript) e frameworks populares (Spring Boot, Thymeleaf), garantindo alta compatibilidade com navegadores modernos.", status: "Implementado" }
+            ],
+            priorities: ["RF1", "RF2", "RF4", "RF5", "RF6", "RF7", "RNF1", "RNF2", "RNF5"]
+        };
+        
+        const statusColors = {
+            "Implementado": { bg: "bg-green-100", text: "text-green-800", border: "border-green-400", chart: "rgba(46, 204, 113, 0.7)" },
+            "Parcialmente Implementado": { bg: "bg-yellow-100", text: "text-yellow-800", border: "border-yellow-400", chart: "rgba(241, 196, 15, 0.7)" }
+        };
+        
+        let statusGeralChart, statusDetalheChart;
+        let currentView = 'functional';
+        
+        function getStatusCounts(reqs) {
+            return reqs.reduce((acc, req) => {
+                acc[req.status] = (acc[req.status] || 0) + 1;
+                return acc;
+            }, {});
+        }
+        
+        function renderDashboard() {
+            document.getElementById('total-rf').textContent = data.functional.length;
+            document.getElementById('total-rnf').textContent = data.nonFunctional.length;
+        
+            const allReqs = [...data.functional, ...data.nonFunctional];
+            const counts = getStatusCounts(allReqs);
+            
+            const ctx = document.getElementById('statusGeralChart').getContext('2d');
+            if(statusGeralChart) statusGeralChart.destroy();
+            statusGeralChart = new Chart(ctx, {
+                type: 'doughnut',
+                data: {
+                    labels: Object.keys(counts),
+                    datasets: [{
+                        data: Object.values(counts),
+                        backgroundColor: Object.keys(counts).map(status => statusColors[status].chart),
+                        borderColor: '#FDFBF8',
+                        borderWidth: 4
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: { position: 'bottom', labels: { boxWidth: 12, padding: 15 } },
+                        tooltip: {
+                            callbacks: {
+                                label: function(context) {
+                                    let label = context.label || '';
+                                    if (label) {
+                                        label += ': ';
+                                    }
+                                    if (context.parsed !== null) {
+                                        label += context.parsed;
+                                    }
+                                    return label;
+                                }
+                            }
+                        }
+                    }
+                }
+            });
+        }
+        
+        function renderRequirements(type) {
+            const reqs = data[type];
+            const listElement = document.getElementById('requirements-list');
+            listElement.innerHTML = '';
+        
+            reqs.forEach(req => {
+                const color = statusColors[req.status];
+                const card = `
+                    <div class="border-2 ${color.border} rounded-lg p-6 ${color.bg} flex flex-col justify-between">
+                        <div>
+                            <div class="flex items-center justify-between mb-4">
+                                <h4 class="text-xl font-bold text-gray-800">${req.id}</h4>
+                                <span class="text-xs font-semibold px-3 py-1 ${color.bg} ${color.text} rounded-full border ${color.border}">${req.status.replace(' ', '\u00A0')}</span>
+                            </div>
+                            <h5 class="text-lg font-semibold text-gray-700 mb-2">${req.req}</h5>
+                            <p class="text-base text-gray-600">${req.desc}</p>
+                        </div>
+                    </div>
+                `;
+                listElement.innerHTML += card;
+            });
+        
+            updateDetalheChart(type);
+        }
+        
+        function updateDetalheChart(type) {
+            const reqs = data[type];
+            const counts = getStatusCounts(reqs);
+            const labels = Object.keys(counts);
+            const chartData = Object.values(counts);
+        
+            if (statusDetalheChart) {
+                statusDetalheChart.destroy();
+            }
+        
+            const ctx = document.getElementById('statusDetalheChart').getContext('2d');
+            statusDetalheChart = new Chart(ctx, {
+                type: 'bar',
+                data: {
+                    labels: labels.map(label => label.split(' ')),
+                    datasets: [{
+                        label: 'Contagem de Status',
+                        data: chartData,
+                        backgroundColor: labels.map(status => statusColors[status].chart),
+                        borderColor: labels.map(status => statusColors[status].chart.replace('0.7', '1')),
+                        borderWidth: 1
+                    }]
+                },
+                options: {
+                    indexAxis: 'y',
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: { display: false }
+                    },
+                    scales: {
+                        x: {
+                            beginAtZero: true,
+                            ticks: {
+                                stepSize: 1
+                            }
+                        }
+                    }
+                }
+            });
+        }
+        
+        function renderPriorities() {
+            const listElement = document.getElementById('priority-list');
+            const allReqs = [...data.functional, ...data.nonFunctional];
+            listElement.innerHTML = '';
+            data.priorities.forEach(pId => {
+                const req = allReqs.find(r => r.id === pId);
+                if (req) {
+                    const item = `
+                        <li class="flex items-center space-x-3">
+                            <span class="flex-shrink-0 h-6 w-6 rounded-full bg-blue-100 text-blue-800 flex items-center justify-center font-bold text-xs">${req.id.replace('R','')}</span>
+                            <span class="text-gray-700">${req.req}</span>
+                        </li>
+                    `;
+                    listElement.innerHTML += item;
+                }
+            });
+        }
+        
+        const progressBar = document.getElementById('progress-bar');
+        let currentSlide = 0;
+        const slidesContainer = document.getElementById('slides-container');
+        const slides = document.querySelectorAll('.slide');
+        const totalSlides = slides.length;
+        const prevBtn = document.getElementById('prev-btn');
+        const nextBtn = document.getElementById('next-btn');
+        const slideImages = document.querySelectorAll('.slide-image');
+        
+        function updateProgressBar() {
+            const progress = (currentSlide / (totalSlides - 1)) * 100;
+            progressBar.style.width = `${progress}%`;
+        }
+        
+        function updateSlide() {
+            slidesContainer.style.transform = `translateX(-${currentSlide * 100}vw)`;
+            prevBtn.disabled = currentSlide === 0;
+            nextBtn.disabled = currentSlide === totalSlides - 1;
+            prevBtn.classList.toggle('opacity-50', prevBtn.disabled);
+            prevBtn.classList.toggle('cursor-not-allowed', prevBtn.disabled);
+            nextBtn.classList.toggle('opacity-50', nextBtn.disabled);
+            nextBtn.classList.toggle('cursor-not-allowed', nextBtn.disabled);
+            updateProgressBar();
+            
+            // Controla as animações de fade-in dos elementos e das imagens
+            slides.forEach((slide, index) => {
+                const elements = slide.querySelectorAll('.fade-in-element');
+                const image = slide.querySelector('.slide-image');
+        
+                if (index === currentSlide) {
+                    // Anima os elementos de texto e a imagem do slide atual
+                    elements.forEach((el, i) => {
+                        setTimeout(() => {
+                            el.classList.add('fade-in-active');
+                        }, i * 150); // Atraso de 150ms para cada elemento
+                    });
+                    if (image) {
+                        image.classList.add('slide-image-active');
+                    }
+                } else {
+                    // Remove a classe de animação dos outros slides
+                    elements.forEach(el => el.classList.remove('fade-in-active'));
+                    if (image) {
+                        image.classList.remove('slide-image-active');
+                    }
+                }
+            });
+        }
+        
+        nextBtn.addEventListener('click', () => {
+            if (currentSlide < totalSlides - 1) {
+                currentSlide++;
+                updateSlide();
+            }
+        });
+        
+        prevBtn.addEventListener('click', () => {
+            if (currentSlide > 0) {
+                currentSlide--;
+                updateSlide();
+            }
+        });
+        
+        document.addEventListener('keydown', (event) => {
+            if (event.key === 'ArrowRight') {
+                nextBtn.click();
+            } else if (event.key === 'ArrowLeft') {
+                prevBtn.click();
+            }
+        });
+        
+        document.addEventListener('DOMContentLoaded', () => {
+            renderDashboard();
+            renderRequirements(currentView);
+            renderPriorities();
+            updateSlide();
+        
+            const btnRf = document.getElementById('btn-rf');
+            const btnRnf = document.getElementById('btn-rnf');
+        
+            btnRf.addEventListener('click', () => {
+                currentView = 'functional';
+                btnRf.classList.add('border-[#3498DB]', 'text-[#3498DB]');
+                btnRf.classList.remove('border-transparent', 'text-gray-500');
+                btnRnf.classList.add('border-transparent', 'text-gray-500');
+                btnRnf.classList.remove('border-[#3498DB]', 'text-[#3498DB]');
+                renderRequirements(currentView);
+            });
+        
+            btnRnf.addEventListener('click', () => {
+                currentView = 'nonFunctional';
+                btnRnf.classList.add('border-[#3498DB]', 'text-[#3498DB]');
+                btnRnf.classList.remove('border-transparent', 'text-gray-500');
+                btnRf.classList.add('border-transparent', 'text-gray-500');
+                btnRf.classList.remove('border-[#3498DB]', 'text-[#3498DB]');
+                renderRequirements(currentView);
+            });
+        });
+    </script>
+</body>
+</html>
