@@ -1,0 +1,122 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Painel do Projeto Gaio</title>
+    <!-- Carregando bibliotecas externas -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    
+    <!-- Vinculando o arquivo CSS externo -->
+    <link rel="stylesheet" href="style.css">
+</head>
+<body class="antialiased">
+
+    <div class="slides-container" id="slides-container">
+        
+        <div class="slide">
+            <div class="slide-panel text-center">
+                <header class="mb-8">
+                    <h1 class="text-4xl md:text-5xl font-bold text-[#2C3E50] mb-2">Projeto Gaio</h1>
+                    <p class="text-lg text-gray-600">Uma visão interativa da documentação da ferramenta de gestão de tarefas.</p>
+                </header>
+            </div>
+        </div>
+
+        <div class="slide">
+            <div class="slide-panel">
+                <section id="dashboard">
+                    <h2 class="text-2xl font-bold text-center mb-6 text-[#34495E]">Visão Geral do Projeto</h2>
+                    <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                        <div class="bg-gray-50 p-6 rounded-lg shadow-md flex flex-col justify-center items-center">
+                            <span class="text-5xl font-bold text-[#3498DB]" id="total-rf"></span>
+                            <p class="text-gray-500 mt-2">Requisitos Funcionais</p>
+                        </div>
+                        <div class="bg-gray-50 p-6 rounded-lg shadow-md flex flex-col justify-center items-center">
+                            <span class="text-5xl font-bold text-[#E74C3C]" id="total-rnf"></span>
+                            <p class="text-gray-500 mt-2">Requisitos Não Funcionais</p>
+                        </div>
+                        <div class="bg-gray-50 p-6 rounded-lg shadow-md">
+                            <h3 class="text-lg font-semibold text-center mb-4">Status Geral de Implementação</h3>
+                            <div class="chart-container h-48">
+                                <canvas id="statusGeralChart"></canvas>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+            </div>
+        </div>
+
+        <div class="slide">
+            <div class="slide-panel">
+                <section id="explorer">
+                    <h2 class="text-2xl font-bold text-center mb-6 text-[#34495E]">Explorador de Requisitos</h2>
+                    <div class="flex justify-center border-b mb-6">
+                        <button id="btn-rf" class="px-6 py-2 text-lg font-semibold border-b-4 border-[#3498DB] text-[#3498DB]">Funcionais</button>
+                        <button id="btn-rnf" class="px-6 py-2 text-lg font-semibold border-b-4 border-transparent text-gray-500">Não Funcionais</button>
+                    </div>
+                    
+                    <div class="w-full mb-8">
+                        <h3 class="text-lg font-semibold text-center mb-4">Distribuição de Status</h3>
+                        <div class="chart-container h-64">
+                            <canvas id="statusDetalheChart"></canvas>
+                        </div>
+                    </div>
+
+                    <div id="requirements-list" class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    </div>
+                </section>
+            </div>
+        </div>
+        
+        <div class="slide">
+            <div class="slide-panel">
+                <section id="priority">
+                    <h2 class="text-2xl font-bold text-center mb-6 text-[#34495E]">Requisitos Prioritários</h2>
+                    <div class="bg-white p-6 rounded-lg shadow-md">
+                        <ul id="priority-list" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+                        </ul>
+                    </div>
+                </section>
+            </div>
+        </div>
+
+        <div class="slide">
+            <div class="slide-panel">
+                <section id="nrp">
+                    <h2 class="text-2xl font-bold text-center mb-6 text-[#34495E]">O Problema do Próximo Lançamento (NRP)</h2>
+                    <div class="prose max-w-none text-gray-600">
+                        <p class="mb-4">O <strong>Next Release Problem (NRP)</strong> é um desafio de otimização no desenvolvimento de software. Ele consiste em selecionar o conjunto ideal de requisitos para serem incluídos na próxima versão de um produto, levando em conta múltiplas restrições.</p>
+                        <h3 class="text-xl font-semibold text-[#34495E] mb-2">Objetivos Principais</h3>
+                        <ul class="list-disc list-inside space-y-1 mb-4">
+                            <li><strong>Maximizar a Satisfação do Cliente:</strong> Entregar as funcionalidades mais valiosas para os usuários.</li>
+                            <li><strong>Minimizar Custo e Esforço:</strong> Respeitar orçamentos e prazos de desenvolvimento.</li>
+                            <li><strong>Gerenciar Dependências:</strong> Considerar que alguns requisitos só podem ser implementados após outros.</li>
+                        </ul>
+                        <h3 class="text-xl font-semibold text-[#34495E] mb-2">Por que é um problema complexo?</h3>
+                        <ul class="list-disc list-inside space-y-1 mb-4">
+                            <li>É considerado um problema <strong>NP-hard</strong>, o que significa que não há uma solução trivial.</li>
+                            <li>Envolve a conciliação de objetivos conflitantes (satisfação vs. custo).</li>
+                            <li>Requer a tomada de decisões em um cenário de incertezas e interdependências.</li>
+                        </ul>
+                        <p class="mt-4 text-center text-sm text-gray-500">Em resumo, o NRP é o desafio de decidir o que entregar a seguir, balanceando o valor para o cliente com a viabilidade técnica e financeira.</p>
+                    </div>
+                </section>
+            </div>
+        </div>
+
+    </div>
+
+    <div class="fixed bottom-8 left-1/2 transform -translate-x-1/2 flex space-x-4">
+        <button id="prev-btn" class="bg-white text-gray-700 font-bold py-2 px-4 rounded-full shadow-lg opacity-50 cursor-not-allowed transition duration-300 ease-in-out">Anterior</button>
+        <button id="next-btn" class="bg-white text-gray-700 font-bold py-2 px-4 rounded-full shadow-lg transition duration-300 ease-in-out">Próximo</button>
+    </div>
+
+    <!-- Vinculando o arquivo JavaScript externo -->
+    <script src="script.js"></script>
+</body>
+</html>
